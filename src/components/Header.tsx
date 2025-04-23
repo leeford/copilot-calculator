@@ -1,6 +1,7 @@
 import React from "react";
 import { Image, Text, Title1, makeStyles, tokens } from "@fluentui/react-components";
 import { sharedFilledPillStyles, sharedHorizontalSmallGapFlexStyles, sharedVerticalExtraSmallGapFlexStyles } from "../styles/Styles";
+import copilotLogo from "../assets/copilot.png";
 
 const headerStyles = makeStyles({
     root: {
@@ -24,7 +25,7 @@ export const Header: React.FC = () => {
         <div className={styles.root}>
             <div className={horizontalSmallGapFlexStyles.root}>
                 <Image
-                    src="src/assets/copilot.png"
+                    src={copilotLogo}
                     alt="Copilot Logo"
                     height={100}
                     width={100}

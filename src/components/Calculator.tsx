@@ -67,6 +67,7 @@ export const Calculator: React.FC = () => {
                 >
                     <div className={horizontalMediumGapWrapFlexStyles.root}>
                         <CompoundButton
+                            style={{ width: "100%" }}
                             secondaryContent={
                                 <ul>
                                     <li>
@@ -92,6 +93,7 @@ export const Calculator: React.FC = () => {
                             M365 Copilot
                         </CompoundButton>
                         <CompoundButton
+                            style={{ width: "100%" }}
                             secondaryContent={
                                 <ul>
                                     <li>
