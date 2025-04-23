@@ -196,6 +196,7 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
         <div className={horizontalMediumGapFlexStyles.root}>
             <div className={verticalExtraSmallGapFlexStyles.root}>
                 <Button
+                    aria-label="Increase"
                     icon={<AddIcon />}
                     className={styles.button}
                     size="small"
@@ -213,6 +214,7 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
                     }}
                 />
                 <Button
+                    aria-label="Decrease"
                     icon={<SubtractIcon />}
                     className={styles.button}
                     size="small"
