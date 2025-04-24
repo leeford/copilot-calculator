@@ -25,7 +25,7 @@ export const About: React.FC = () => {
                 <Text>All information is provided "as is" and without warranty of any kind, either express or implied, including but not limited to the implied warranties of merchantability and fitness for a particular purpose. In no event shall the author be liable for any damages arising from the use of this information.</Text>
                 <Text>Microsoft 365, Copilot, the Copilot logo, and other Microsoft properties are trademarks of Microsoft Corporation. All other trademarks are the property of their respective owners.</Text>
                 <Subtitle1>Feedback</Subtitle1>
-                <Text>This is an open source project and I welcome any feedback or suggestions. If you have any ideas for new features or improvements, please feel free to reach out to me on <Link href="https://bsky.app/profile/lee-ford.co.uk" target="_top">BlueSky</Link> or raise an issue on the <Link href="https://www.github.com/lee-ford/copilot-calculator" target="_top">GitHub repository</Link>.</Text>
+                <Text>This is an open source project and I welcome any feedback or suggestions. If you have any ideas for new features or improvements, please feel free to reach out to me on <Link href="https://bsky.app/profile/lee-ford.co.uk" target="_top">BlueSky</Link> or raise an issue on the <Link href="https://www.github.com/leeford/copilot-calculator" target="_top">GitHub repository</Link>.</Text>
             </div>
         </Container>
     );
