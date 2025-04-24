@@ -191,7 +191,7 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
                                         calculations: [
                                             `Daily cost (per user): $${formatNumber((totalCost / props.values.users) / props.values.workDays)}`,
                                             `Hourly rate (per user): $${formatNumber((props.values.averageSalary / 12) / (props.values.workDays * props.values.workHours))}`,
-                                            `Break-even: $${formatNumber((totalCost / props.values.users) / props.values.workDays)} (daily cost) ÷ $${formatNumber((props.values.averageSalary / 12) / (props.values.workDays * props.values.workHours))} (hourly rate) × 60 minutes = ${breakEvenMinutesPerDay.toFixed(1)} minutes`,
+                                            `($${formatNumber((totalCost / props.values.users) / props.values.workDays)} ÷ $${formatNumber((props.values.averageSalary / 12) / (props.values.workDays * props.values.workHours))} × 60 minutes)`,
                                         ],
                                         value: `${breakEvenMinutesPerDay.toFixed(1)} minutes saved per user, per day (${((breakEvenMinutesPerDay / (props.values.workHours * 60)) * 100).toFixed(1)}% of workday)`,
                                     }

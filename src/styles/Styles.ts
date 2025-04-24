@@ -150,7 +150,7 @@ export const sharedCompoundButtonStyles = makeStyles({
 export const sharedTitleStyles = makeStyles({
     root: {
         WebkitBackgroundClip: "text",
-        backgroundImage: "linear-gradient(to right, rgb(218, 139, 224), rgb(161, 207, 237))",
+        backgroundImage: "linear-gradient(to right, rgb(217, 112, 225), rgb(121, 186, 229))",
         backgroundClip: "text",
         color: "transparent",
         position: "relative"
