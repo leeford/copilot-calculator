@@ -13,7 +13,7 @@ interface IContainerProps {
 
 const ContainerStyles = makeStyles({
     root: {
-        minWidth: "240px",
+        minWidth: "220px",
         padding: (tokens.spacingVerticalM, tokens.spacingHorizontalM),
         ...shorthands.borderWidth(tokens.strokeWidthThin),
         ...shorthands.borderStyle("solid"),

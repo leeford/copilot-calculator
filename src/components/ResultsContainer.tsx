@@ -1,5 +1,6 @@
-import { makeStyles, Text, tokens } from "@fluentui/react-components";
+import { Caption1, makeStyles, Text, tokens } from "@fluentui/react-components";
 import React from "react";
+import { sharedTitleStyles } from "../styles/Styles";
 
 interface IResult {
     description: string;
@@ -31,18 +32,12 @@ const resultsContainerStyles = makeStyles({
     resultDescription: {
         flexShrink: 0,
         paddingRight: tokens.spacingHorizontalL,
-        width: "33%",
+        width: "50%",
         overflow: "hidden"
-    },
-    resultCalculation: {
-        flexShrink: 0,
-        paddingRight: tokens.spacingHorizontalL,
-        width: "33%",
-        overflow: "hidden",
     },
     resultValue: {
         flexShrink: 0,
-        width: "33%",
+        width: "40%",
         textAlign: "right"
     },
     totalRow: {
@@ -61,38 +56,39 @@ const resultsContainerStyles = makeStyles({
         gap: tokens.spacingVerticalXS,
         flexGrow: 1,
         paddingRight: tokens.spacingHorizontalL,
-    },
-    calculationItem: {
-        fontSize: tokens.fontSizeBase200,
-        display: "block",
     }
 });
 
 export const ResultsContainer: React.FC<IResultsContainerProps> = (props) => {
     const styles = resultsContainerStyles();
+    const titleStyles = sharedTitleStyles();
 
     return (
         <div className={styles.root}>
             {props.results.map((result) => (
                 <div key={result.description} className={styles.resultRow}>
-                    <Text weight="semibold" className={styles.resultDescription}>{result.description}</Text>
-                    <div className={styles.calculationsColumn}>
-                        {result.calculations?.map((calculation) => (
-                            <Text key={calculation} className={styles.calculationItem}>{calculation}</Text>
-                        ))}
+                    <div className={styles.resultDescription}>
+                        <Text weight="semibold">{result.description}</Text>
+                        <div className={styles.calculationsColumn}>
+                            {result.calculations?.map((calculation) => (
+                                <Caption1 key={calculation}>{calculation}</Caption1>
+                            ))}
+                        </div>
                     </div>
                     <Text weight="bold" wrap className={styles.resultValue}>{result.value}</Text>
                 </div>
             ))}
             {props.total && (
                 <div className={styles.totalRow}>
-                    <Text weight="semibold" className={styles.resultDescription} size={400}>{props.total.description}</Text>
-                    <div className={styles.calculationsColumn}>
-                        {props.total.calculations?.map((calculation) => (
-                            <Text key={calculation} className={styles.calculationItem}>{calculation}</Text>
-                        ))}
+                    <div className={styles.resultDescription}>
+                        <Text weight="semibold">{props.total.description}</Text>
+                        <div className={styles.calculationsColumn}>
+                            {props.total.calculations?.map((calculation) => (
+                                <Caption1 key={calculation}>{calculation}</Caption1>
+                            ))}
+                        </div>
                     </div>
-                    <Text weight="bold" className={styles.resultValue} size={400}>{props.total.value}</Text>
+                    <Text weight="bold" wrap className={titleStyles.root}>{props.total.value}</Text>
                 </div>
             )}
         </div>
