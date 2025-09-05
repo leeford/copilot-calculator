@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Collapse } from "@fluentui/react-motion-components-preview";
 import { Container } from "./Container";
-import { Switch, Text, Divider, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, Input, Subtitle1, Button, makeStyles } from "@fluentui/react-components";
+import { Switch, Text, Divider, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, Input, Subtitle1, Button, makeStyles, Caption1 } from "@fluentui/react-components";
 import { CustomField } from "./CustomField";
 import { IAgentScenarioConsumption } from "../types/IAgentScenarioConsumption";
 import { sharedHorizontalMediumGapFlexStyles, sharedVerticalExtraSmallGapFlexStyles, sharedVerticalMediumGapFlexStyles } from "../styles/Styles";
@@ -27,7 +27,7 @@ interface IAgentProps {
         agentId: string,
         name: string,
         conversationsPerDay: number,
-    billedCreditsPerDay: number,
+        billedCreditsPerDay: number,
         scenarioConsumption?: IAgentScenarioConsumption
     ) => void;
     scenarioConsumption: IAgentScenarioConsumption;
@@ -47,7 +47,6 @@ const AI_TOOLS_STANDARD_BILLING_RATE = 1.5;
 const AI_TOOLS_PREMIUM_BILLING_RATE = 10;
 
 // Strings
-const INCLUDED_WITH_LICENSE = "(Included with M365 Copilot license)";
 
 interface ScenarioConfig {
     key: keyof IAgentScenarioConsumption;
@@ -141,8 +140,8 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
         return scenarioConfigs.reduce((total, scenario) => {
             const scenarioValue = localScenarioConsumption[scenario.key];
 
-            // Calculate "standard" cost (free if licensed and included with license)
-            const standardCost = (isLicensed && scenario.isIncludedWithLicense)
+            // New billing: if licensed, ALL standard counts are included across scenarios
+            const standardCost = isLicensed
                 ? 0
                 : scenarioValue.standard * scenario.billingRate;
 
@@ -157,8 +156,8 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
 
     // Update agent when local state changes
     useEffect(() => {
-    const messageCount = conversationsPerDay * calculateMessagesPerConversation();
-    console.log(`Agent ${props.agentId} updated: ${agentName}, conversationsPerDay: ${conversationsPerDay}, creditCount: ${messageCount}`);
+        const messageCount = conversationsPerDay * calculateMessagesPerConversation();
+        console.log(`Agent ${props.agentId} updated: ${agentName}, conversationsPerDay: ${conversationsPerDay}, creditCount: ${messageCount}`);
         props.updateAgent(
             props.agentId,
             agentName,
@@ -174,22 +173,24 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
         props.copilotSku
     ]);
 
-    const renderMessageCost = (standardCount: number, autonomousCount: number, rate: number, isIncludedWithLicense: boolean) => {
-        if (props.copilotSku === CopilotSku.M365Copilot && isIncludedWithLicense) {
+    const renderMessageCost = (standardCount: number, autonomousCount: number, rate: number, _isIncludedWithLicense: boolean) => {
+        // If M365 Copilot is licensed, ALL standard counts are included (free). Only autonomous billed.
+        if (props.copilotSku === CopilotSku.M365Copilot) {
             if (autonomousCount > 0) {
                 return (
                     <div>
-                        <Text><b>Standard:</b> 0 <i>{INCLUDED_WITH_LICENSE}</i></Text>
+                        <Text><b>Standard:</b> 0</Text>
                         <br />
                         <Text><b>Autonomous:</b> {formatNumber(autonomousCount * rate)}</Text>
                     </div>
                 );
             } else {
-                return <Text>0 <i>{INCLUDED_WITH_LICENSE}</i></Text>;
+                return <Text>0</Text>;
             }
-        } else {
-            return formatNumber((standardCount + autonomousCount) * rate);
         }
+
+        // Not licensed (Copilot Chat): both standard and autonomous billed
+        return formatNumber((standardCount + autonomousCount) * rate);
     };
 
     const renderIncreaseDecreaseButtons = (value: number, fieldName: keyof IAgentScenarioConsumption, subField: "standard" | "autonomous") => (
@@ -369,6 +370,11 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
                             </TableRow>
                         </TableBody>
                     </Table>
+                    {props.copilotSku === CopilotSku.M365Copilot && (
+                        <Caption1>
+                            * With an M365 Copilot license, all standard usage is included at no additional cost. Only autonomous usage is billed.
+                        </Caption1>
+                    )}
                     <ResultsContainer
                         results={[
                             {

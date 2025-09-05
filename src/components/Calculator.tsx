@@ -30,7 +30,7 @@ export const Calculator: React.FC = () => {
         users: NUMBER_OF_USERS,
         averageSalary: AVERAGE_SALARY,
         licenseCost: LICENSE_COST_PER_USER,
-    creditCost: CREDIT_COST,
+        creditCost: CREDIT_COST,
         workHours: WORK_HOURS,
         workDays: WORK_DAYS,
         agents: defaultAgents

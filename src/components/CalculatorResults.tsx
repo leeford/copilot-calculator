@@ -248,7 +248,7 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
                                         .map(agentCost => (
                                             <TableRow key={agentCost.id}>
                                                 <TableCell>{agentCost.name}</TableCell>
-                        <TableCell>{formatNumber(agentCost.monthlyMessages)} credits</TableCell>
+                                                <TableCell>{formatNumber(agentCost.monthlyMessages)} credits</TableCell>
                                                 <TableCell>${formatNumber(agentCost.monthlyCost)}</TableCell>
                                                 <TableCell>
                                                     {renderPercentageBar(agentCost.percentOfTotal)}
@@ -257,7 +257,7 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
                                         ))}
                                     <TableRow appearance="neutral">
                                         <TableCell><Text weight="semibold">Total</Text></TableCell>
-                    <TableCell><Text weight="semibold">{formatNumber(totalDailyMessages * props.values.workDays)} credits</Text></TableCell>
+                                        <TableCell><Text weight="semibold">{formatNumber(totalDailyMessages * props.values.workDays)} credits</Text></TableCell>
                                         <TableCell><Text weight="semibold">${formatNumber(totalCost)}</Text></TableCell>
                                         <TableCell>{renderPercentageBar(100)}</TableCell>
                                     </TableRow>
