@@ -6,8 +6,6 @@ export interface ICalculatorValues {
     licenseCost: number;
     creditCost: number;
     users: number;
-    averageSalary: number;
-    workHours: number;
     workDays: number;
     agents: IAgent[];
 }

@@ -65,19 +65,6 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
         return { agentCost, totalDailyMessages };
     };
 
-    const calculateBreakEvenTime = () => {
-        if (props.values.users === 0) return 0;
-
-        // Calculate cost per user per day
-        const monthlyCostPerUser = (licenseCost + agentCost) / props.values.users;
-        const dailyCostPerUser = monthlyCostPerUser / props.values.workDays;
-
-        // Calculate hourly rate from annual salary
-        const hourlyRate = (props.values.averageSalary / 12) / (props.values.workDays * props.values.workHours);
-        const breakEvenMinutesPerDay = (dailyCostPerUser / hourlyRate) * 60;
-
-        return breakEvenMinutesPerDay;
-    };
 
     // Calculate license and agent costs first...
     const licenseCost = calculateLicenseCost();
@@ -107,7 +94,6 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
     };
 
     const perAgentCosts = calculatePerAgentCosts();
-    const breakEvenMinutesPerDay = calculateBreakEvenTime();
 
     const renderPercentageBar = (percent: number) => {
         const barWidth = Math.max(percent, 2);
@@ -138,7 +124,7 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
         <Container
             icon={<p className={filledPillStyles.root}>RESULT</p>}
             header="The bottom line"
-            description="Based on the information you provided, here are the estimated costs and break-even points for your M365 Copilot deployment."
+            description="Based on the information you provided, here are the estimated monthly costs for your M365 Copilot deployment."
             width={800}
         >
             <ResultsContainer
@@ -150,10 +136,6 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
                     {
                         description: "Estimated monthly agent costs",
                         value: `$${formatNumber(agentCost)}`,
-                    },
-                    {
-                        description: "Break-even point",
-                        value: `${breakEvenMinutesPerDay.toFixed(1)} minutes saved per user, per day (${((breakEvenMinutesPerDay / (props.values.workHours * 60)) * 100).toFixed(1)}% of workday)`,
                     },
                 ]}
                 total={{
@@ -186,15 +168,6 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
                                         calculations: [`${totalDailyMessages} (credits) × $${formatNumber(props.values.creditCost)} (per credit) × ${props.values.workDays} (workdays)`],
                                         value: `$${formatNumber(agentCost)}`,
                                     },
-                                    {
-                                        description: "Break-even point",
-                                        calculations: [
-                                            `Daily cost (per user): $${formatNumber((totalCost / props.values.users) / props.values.workDays)}`,
-                                            `Hourly rate (per user): $${formatNumber((props.values.averageSalary / 12) / (props.values.workDays * props.values.workHours))}`,
-                                            `($${formatNumber((totalCost / props.values.users) / props.values.workDays)} ÷ $${formatNumber((props.values.averageSalary / 12) / (props.values.workDays * props.values.workHours))} × 60 minutes)`,
-                                        ],
-                                        value: `${breakEvenMinutesPerDay.toFixed(1)} minutes saved per user, per day (${((breakEvenMinutesPerDay / (props.values.workHours * 60)) * 100).toFixed(1)}% of workday)`,
-                                    }
                                 ]}
                                 total={{
                                     description: "Total estimated monthly cost",
@@ -209,7 +182,7 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
                             <Text>This calculation is based on the following assumptions:</Text>
                             <ul>
                                 <li>
-                                    <Text>{props.values.users.toLocaleString()} users working {props.values.workHours} hours per day, {props.values.workDays} days per month, at an average salary of ${formatNumber(props.values.averageSalary)}</Text>
+                                    <Text>{props.values.users.toLocaleString()} users working {props.values.workDays} days per month</Text>
                                 </li>
                                 <li>
                                     <Text>Copilot license costs: ${formatNumber(props.values.licenseCost)} per user, per month</Text>
