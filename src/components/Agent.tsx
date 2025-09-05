@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Collapse } from "@fluentui/react-motion-components-preview";
 import { Container } from "./Container";
-import { Switch, Text, Divider, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, Input, Subtitle1, Button, makeStyles } from "@fluentui/react-components";
+import { Switch, Text, Divider, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, Input, Subtitle1, Button, makeStyles, Caption1 } from "@fluentui/react-components";
 import { CustomField } from "./CustomField";
 import { IAgentScenarioConsumption } from "../types/IAgentScenarioConsumption";
 import { sharedHorizontalMediumGapFlexStyles, sharedVerticalExtraSmallGapFlexStyles, sharedVerticalMediumGapFlexStyles } from "../styles/Styles";
@@ -9,6 +9,7 @@ import { CopilotSku } from "../types/CopilotSku";
 import { formatNumber } from "../utils/formatUtils";
 import { Add12Filled, Add12Regular, bundleIcon, Subtract12Filled, Subtract12Regular } from "@fluentui/react-icons";
 import { ResultsContainer } from "./ResultsContainer";
+import { calculateCreditsPerConversation, scenarioConfigs } from "../config/scenarios";
 
 const agentStyles = makeStyles({
     button: {
@@ -27,7 +28,7 @@ interface IAgentProps {
         agentId: string,
         name: string,
         conversationsPerDay: number,
-        billedMessagesPerDay: number,
+        billedCreditsPerDay: number,
         scenarioConsumption?: IAgentScenarioConsumption
     ) => void;
     scenarioConsumption: IAgentScenarioConsumption;
@@ -36,86 +37,6 @@ interface IAgentProps {
     workDays: number;
 }
 
-// Message billing rates
-const CLASSIC_ANSWER_MESSAGE_BILLING_RATE = 1;
-const GENERATIVE_ANSWER_MESSAGE_BILLING_RATE = 2;
-const AGENT_ACTION_MESSAGE_BILLING_RATE = 5;
-const TENANT_GRAPH_GROUNDING_MESSAGE_BILLING_RATE = 10;
-const AGENT_FLOW_ACTIONS_BILLING_RATE = 13;
-const AI_TOOLS_BASIC_BILLING_RATE = 0.1;
-const AI_TOOLS_STANDARD_BILLING_RATE = 1.5;
-const AI_TOOLS_PREMIUM_BILLING_RATE = 10;
-
-// Strings
-const INCLUDED_WITH_LICENSE = "(Included with M365 Copilot license)";
-
-interface ScenarioConfig {
-    key: keyof IAgentScenarioConsumption;
-    name: string;
-    billingRate: number;
-    isIncludedWithLicense: boolean;
-    supportsAutonomous?: boolean;
-}
-
-// All scenarios types
-const scenarioConfigs: ScenarioConfig[] = [
-    {
-        key: "classicAnswers",
-        name: "Classic answers",
-        billingRate: CLASSIC_ANSWER_MESSAGE_BILLING_RATE,
-        isIncludedWithLicense: true,
-        supportsAutonomous: false
-    },
-    {
-        key: "generativeAnswers",
-        name: "Generative answers",
-        billingRate: GENERATIVE_ANSWER_MESSAGE_BILLING_RATE,
-        isIncludedWithLicense: true,
-        supportsAutonomous: true
-    },
-    {
-        key: "agentActions",
-        name: "Agent actions",
-        billingRate: AGENT_ACTION_MESSAGE_BILLING_RATE,
-        isIncludedWithLicense: true,
-        supportsAutonomous: true
-    },
-    {
-        key: "tenantGraphGrounding",
-        name: "Tenant graph grounding",
-        billingRate: TENANT_GRAPH_GROUNDING_MESSAGE_BILLING_RATE,
-        isIncludedWithLicense: true,
-        supportsAutonomous: true
-    },
-    {
-        key: "agentFlowActions",
-        name: "Agent flow actions",
-        billingRate: AGENT_FLOW_ACTIONS_BILLING_RATE,
-        isIncludedWithLicense: false,
-        supportsAutonomous: true
-    },
-    {
-        key: "aiToolsBasic",
-        name: "AI tools: Basic response",
-        billingRate: AI_TOOLS_BASIC_BILLING_RATE,
-        isIncludedWithLicense: false,
-        supportsAutonomous: true
-    },
-    {
-        key: "aiToolsStandard",
-        name: "AI tools: Standard response",
-        billingRate: AI_TOOLS_STANDARD_BILLING_RATE,
-        isIncludedWithLicense: false,
-        supportsAutonomous: true
-    },
-    {
-        key: "aiToolsPremium",
-        name: "AI tools: Premium response",
-        billingRate: AI_TOOLS_PREMIUM_BILLING_RATE,
-        isIncludedWithLicense: false,
-        supportsAutonomous: true
-    }
-];
 
 export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
 
@@ -134,31 +55,15 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
         setLocalScenarioConsumption(props.scenarioConsumption);
     }, [props.scenarioConsumption]);
 
-    // Calculate messages per conversation
-    const calculateMessagesPerConversation = () => {
-        const isLicensed = props.copilotSku === CopilotSku.M365Copilot;
-
-        return scenarioConfigs.reduce((total, scenario) => {
-            const scenarioValue = localScenarioConsumption[scenario.key];
-
-            // Calculate "standard" cost (free if licensed and included with license)
-            const standardCost = (isLicensed && scenario.isIncludedWithLicense)
-                ? 0
-                : scenarioValue.standard * scenario.billingRate;
-
-            // "autonomous" is always charged
-            const autonomousCost = scenarioValue.autonomous * scenario.billingRate;
-
-            return total + standardCost + autonomousCost;
-        }, 0);
-    };
+    // Calculate credits per conversation
+    const calculateMessagesPerConversation = () => calculateCreditsPerConversation(localScenarioConsumption, props.copilotSku);
 
     const messagesPerConversation = calculateMessagesPerConversation();
 
     // Update agent when local state changes
     useEffect(() => {
         const messageCount = conversationsPerDay * calculateMessagesPerConversation();
-        console.log(`Agent ${props.agentId} updated: ${agentName}, conversationsPerDay: ${conversationsPerDay}, messageCount: ${messageCount}`);
+        console.log(`Agent ${props.agentId} updated: ${agentName}, conversationsPerDay: ${conversationsPerDay}, creditCount: ${messageCount}`);
         props.updateAgent(
             props.agentId,
             agentName,
@@ -174,22 +79,24 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
         props.copilotSku
     ]);
 
-    const renderMessageCost = (standardCount: number, autonomousCount: number, rate: number, isIncludedWithLicense: boolean) => {
-        if (props.copilotSku === CopilotSku.M365Copilot && isIncludedWithLicense) {
+    const renderMessageCost = (standardCount: number, autonomousCount: number, rate: number, _isIncludedWithLicense: boolean) => {
+        // If M365 Copilot is licensed, ALL standard counts are included (free). Only autonomous billed.
+        if (props.copilotSku === CopilotSku.M365Copilot) {
             if (autonomousCount > 0) {
                 return (
                     <div>
-                        <Text><b>Standard:</b> 0 <i>{INCLUDED_WITH_LICENSE}</i></Text>
+                        <Text><b>Standard:</b> 0</Text>
                         <br />
                         <Text><b>Autonomous:</b> {formatNumber(autonomousCount * rate)}</Text>
                     </div>
                 );
             } else {
-                return <Text>0 <i>{INCLUDED_WITH_LICENSE}</i></Text>;
+                return <Text>0</Text>;
             }
-        } else {
-            return formatNumber((standardCount + autonomousCount) * rate);
         }
+
+        // Not licensed (Copilot Chat): both standard and autonomous billed
+        return formatNumber((standardCount + autonomousCount) * rate);
     };
 
     const renderIncreaseDecreaseButtons = (value: number, fieldName: keyof IAgentScenarioConsumption, subField: "standard" | "autonomous") => (
@@ -317,8 +224,8 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
             <ResultsContainer
                 results={[
                     {
-                        description: "Estimated message consumption per day",
-                        value: `${formatNumber(conversationsPerDay * messagesPerConversation)} messages`
+                        description: "Estimated Copilot credit consumption per day",
+                        value: `${formatNumber(conversationsPerDay * messagesPerConversation)} credits`
                     }
                 ]}
             />
@@ -341,10 +248,10 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
                         size="large"
                     />
                     <Subtitle1>Calculation</Subtitle1>
-                    <Text>Message consumption is calculated based on the following scenarios:</Text>
+                    <Text>Credit consumption is calculated based on the following scenarios:</Text>
                     <Divider />
                     <Table
-                        aria-label="Message consumption table"
+                        aria-label="Credit consumption table"
                         size="small"
                     >
                         <TableHeader>
@@ -353,8 +260,8 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
                                 <TableHeaderCell>Standard</TableHeaderCell>
                                 <TableHeaderCell>Autonomous</TableHeaderCell>
                                 <TableHeaderCell>Total</TableHeaderCell>
-                                <TableHeaderCell>Message Rate</TableHeaderCell>
-                                <TableHeaderCell>Message Cost</TableHeaderCell>
+                                <TableHeaderCell>Credit Rate</TableHeaderCell>
+                                <TableHeaderCell>Credits</TableHeaderCell>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -369,11 +276,16 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
                             </TableRow>
                         </TableBody>
                     </Table>
+                    {props.copilotSku === CopilotSku.M365Copilot && (
+                        <Caption1>
+                            * With an M365 Copilot license, all standard usage is included at no additional cost. Only autonomous usage is billed.
+                        </Caption1>
+                    )}
                     <ResultsContainer
                         results={[
                             {
-                                description: "Estimated message consumption per conversation",
-                                value: `${formatNumber(messagesPerConversation)} messages`
+                                description: "Estimated Copilot credit consumption per conversation",
+                                value: `${formatNumber(messagesPerConversation)} credits`
                             },
                             {
                                 description: "Total conversations per day",
@@ -383,19 +295,19 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
                                 value: `${formatNumber(conversationsPerDay)} conversations`
                             },
                             {
-                                description: "Total messages per day",
+                                description: "Total credits per day",
                                 calculations: [
-                                    `${formatNumber(conversationsPerDay)} (conversations) × ${formatNumber(messagesPerConversation)} (messages per conversation)`
+                                    `${formatNumber(conversationsPerDay)} (conversations) × ${formatNumber(messagesPerConversation)} (credits per conversation)`
                                 ],
-                                value: `${formatNumber(conversationsPerDay * messagesPerConversation)} messages`
+                                value: `${formatNumber(conversationsPerDay * messagesPerConversation)} credits`
                             }
                         ]}
                         total={{
-                            description: "Total messages per month",
+                            description: "Total credits per month",
                             calculations: [
-                                `${formatNumber(conversationsPerDay * messagesPerConversation)} (messages per day) × ${formatNumber(props.workDays)} (workdays)`
+                                `${formatNumber(conversationsPerDay * messagesPerConversation)} (credits per day) × ${formatNumber(props.workDays)} (workdays)`
                             ],
-                            value: `${formatNumber(conversationsPerDay * messagesPerConversation * props.workDays)} messages`
+                            value: `${formatNumber(conversationsPerDay * messagesPerConversation * props.workDays)} credits`
                         }}
                     />
                 </div>

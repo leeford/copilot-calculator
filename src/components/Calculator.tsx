@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CompoundButton, Input, Text } from "@fluentui/react-components";
+import { CompoundButton, Input, Text, makeStyles } from "@fluentui/react-components";
 import { Container } from "./Container";
 import { sharedCompoundButtonStyles, sharedFilledPillStyles, sharedHorizontalMediumGapWrapFlexStyles, sharedVerticalMediumGapFlexStyles } from "../styles/Styles";
 import { CustomField } from "./CustomField";
@@ -12,11 +12,15 @@ import { defaultAgents } from "../config/agents";
 
 // Default values for the calculator
 const NUMBER_OF_USERS = 100;
-const AVERAGE_SALARY = 35000;
 const LICENSE_COST_PER_USER = 30; // USD
-const MESSAGE_COST = 0.01; // USD
-const WORK_HOURS = 7;
+const CREDIT_COST = 0.01; // USD
 const WORK_DAYS = 20;
+
+const useLocalStyles = makeStyles({
+    half: {
+        flex: "1 1 360px"
+    }
+});
 
 export const Calculator: React.FC = () => {
 
@@ -24,19 +28,18 @@ export const Calculator: React.FC = () => {
     const compoundButtonStyles = sharedCompoundButtonStyles();
     const horizontalMediumGapWrapFlexStyles = sharedHorizontalMediumGapWrapFlexStyles();
     const verticalMediumGapFlexStyles = sharedVerticalMediumGapFlexStyles();
+    const columns = useLocalStyles();
 
     const [values, setValues] = useState<ICalculatorValues>({
         copilotSku: CopilotSku.M365Copilot,
         users: NUMBER_OF_USERS,
-        averageSalary: AVERAGE_SALARY,
         licenseCost: LICENSE_COST_PER_USER,
-        messageCost: MESSAGE_COST,
-        workHours: WORK_HOURS,
+        creditCost: CREDIT_COST,
         workDays: WORK_DAYS,
         agents: defaultAgents
     });
 
-    const updateAgent = (agentId: string, name: string, conversationsPerDay: number, billedMessagesPerDay: number, scenarioConsumption?: IAgentScenarioConsumption) => {
+    const updateAgent = (agentId: string, name: string, conversationsPerDay: number, billedCreditsPerDay: number, scenarioConsumption?: IAgentScenarioConsumption) => {
         setValues(prevValues => ({
             ...prevValues,
             agents: prevValues.agents.map(agent =>
@@ -45,7 +48,7 @@ export const Calculator: React.FC = () => {
                         ...agent,
                         name: name,
                         conversationsPerDay: conversationsPerDay,
-                        billedMessagesPerDay: billedMessagesPerDay,
+                        billedCreditsPerDay: billedCreditsPerDay,
                         scenarioConsumption: scenarioConsumption || agent.scenarioConsumption
                     }
                     : agent
@@ -124,87 +127,53 @@ export const Calculator: React.FC = () => {
                 description="Provide a few details about your organization to get a better estimate."
                 width={800}
             >
-                <CustomField
-                    label="How many users do you want to use Copilot?"
-                    required
-                    hint="This is the number of users that will be using Copilot in your organization."
-                >
-                    <Input
-                        value={values.users.toString()}
-                        type="tel"
-                        onChange={(_, data) => {
-                            const parsedValue = parseInt(data.value);
-                            if (isNaN(parsedValue)) {
-                                setValues({ ...values, users: 0 });
-                            } else {
-                                setValues({ ...values, users: parsedValue });
-                            }
-                        }}
-                        placeholder="Enter number of users"
-                        contentAfter={"users"}
-                    />
-                </CustomField>
-                <CustomField
-                    label="What is the average salary of your users?"
-                    required
-                    hint="This is the average salary of the users that will be using Copilot in your organization. It is used to calculate the break-even point."
-                >
-                    <Input
-                        value={values.averageSalary.toString()}
-                        type="tel"
-                        onChange={(_, data) => {
-                            const parsedValue = parseInt(data.value);
-                            if (isNaN(parsedValue)) {
-                                setValues({ ...values, averageSalary: 0 });
-                            } else {
-                                setValues({ ...values, averageSalary: parsedValue });
-                            }
-                        }}
-                        placeholder="Enter average salary"
-                        contentBefore={"$"}
-                    />
-                </CustomField>
-                <CustomField
-                    label="How many hours do your users work per day?"
-                    required
-                    hint="This is the number of hours that your users work per day. It is used to calculate the break-even point."
-                >
-                    <Input
-                        value={values.workHours.toString()}
-                        type="tel"
-                        onChange={(_, data) => {
-                            const parsedValue = parseFloat(data.value);
-                            if (isNaN(parsedValue) || parsedValue > 24) {
-                                setValues({ ...values, workHours: 0 });
-                            } else {
-                                setValues({ ...values, workHours: parsedValue });
-                            }
-                        }}
-                        placeholder="Enter number of hours"
-                        contentAfter={"hours"}
-                    />
-                </CustomField>
-                <CustomField
-                    label="How many days do your users work per month?"
-                    required
-                    hint="This is the number of days that your users work per month. It is used to calculate the break-even point."
-                >
-                    <Input
-                        value={values.workDays.toString()}
-                        type="tel"
-                        onChange={(_, data) => {
-                            const parsedValue = parseInt(data.value);
-                            if (isNaN(parsedValue) || parsedValue > 31) {
-                                setValues({ ...values, workDays: 0 });
-                            }
-                            else {
-                                setValues({ ...values, workDays: parsedValue });
-                            }
-                        }}
-                        placeholder="Enter number of days"
-                        contentAfter={"days"}
-                    />
-                </CustomField>
+                <div className={horizontalMediumGapWrapFlexStyles.root}>
+                    <div className={columns.half}>
+                        <CustomField
+                            label="How many users do you want to use Copilot?"
+                            required
+                            hint="This is the number of users that will be using Copilot in your organization."
+                        >
+                            <Input
+                                value={values.users.toString()}
+                                type="tel"
+                                onChange={(_, data) => {
+                                    const parsedValue = parseInt(data.value);
+                                    if (isNaN(parsedValue)) {
+                                        setValues({ ...values, users: 0 });
+                                    } else {
+                                        setValues({ ...values, users: parsedValue });
+                                    }
+                                }}
+                                placeholder="Enter number of users"
+                                contentAfter={"users"}
+                            />
+                        </CustomField>
+                    </div>
+                    <div className={columns.half}>
+                        <CustomField
+                            label="How many days do your users work per month?"
+                            required
+                            hint="How many days per month do your users typically work? This helps estimate monthly costs."
+                        >
+                            <Input
+                                value={values.workDays.toString()}
+                                type="tel"
+                                onChange={(_, data) => {
+                                    const parsedValue = parseInt(data.value);
+                                    if (isNaN(parsedValue) || parsedValue > 31) {
+                                        setValues({ ...values, workDays: 0 });
+                                    }
+                                    else {
+                                        setValues({ ...values, workDays: parsedValue });
+                                    }
+                                }}
+                                placeholder="Enter number of days"
+                                contentAfter={"days"}
+                            />
+                        </CustomField>
+                    </div>
+                </div>
             </Container>
             <Container
                 icon={<p className={filledPillStyles.root}>STEP 3</p>}

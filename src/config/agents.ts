@@ -5,7 +5,7 @@ export const defaultAgents: IAgent[] = [
         id: "self-service-agent",
         name: "Self service agent",
         conversationsPerDay: 0,
-        billedMessagesPerDay: 0,
+        billedCreditsPerDay: 0,
         scenarioConsumption: {
             classicAnswers: {
                 standard: 2,
@@ -79,6 +79,6 @@ export const defaultAgents: IAgent[] = [
             }
         },
         conversationsPerDay: 0,
-        billedMessagesPerDay: 0
+        billedCreditsPerDay: 0
     }
 ]

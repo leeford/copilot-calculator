@@ -4,6 +4,6 @@ export interface IAgent {
     id: string;
     name: string;
     conversationsPerDay: number;
-    billedMessagesPerDay: number;
+    billedCreditsPerDay: number;
     scenarioConsumption: IAgentScenarioConsumption;
 }

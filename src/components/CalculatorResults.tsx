@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { MessageBar, Text, Divider, Switch, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, Subtitle1, tokens, makeStyles } from "@fluentui/react-components";
+import { MessageBar, Text, Divider, Switch, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, Subtitle1, ProgressBar, Caption1 } from "@fluentui/react-components";
 import { Container } from "./Container";
 import { ICalculatorValues } from "../types/ICalculatorValues";
 import { CopilotSku } from "../types/CopilotSku";
@@ -7,37 +7,14 @@ import { sharedFilledPillStyles, sharedVerticalMediumGapFlexStyles, sharedVertic
 import { Collapse } from "@fluentui/react-motion-components-preview";
 import { formatNumber } from "../utils/formatUtils";
 import { ResultsContainer } from "./ResultsContainer";
+import { calculateCreditsPerConversation } from "../config/scenarios";
 
 interface ICalculatorResultsProps {
     values: ICalculatorValues;
 }
 
-const calculatorResultsStyles = makeStyles({
-    percentBar: {
-        position: "relative",
-        height: "16px",
-        width: "100%",
-        backgroundColor: tokens.colorNeutralBackground4,
-        borderRadius: tokens.borderRadiusMedium,
-        "& > div": {
-            position: "absolute",
-            height: "100%",
-            backgroundColor: tokens.colorBrandForeground1,
-            borderRadius: tokens.borderRadiusMedium,
-        }
-    },
-    percentText: {
-        position: "absolute",
-        left: "50%",
-        top: "50%",
-        transform: "translate(-50%, -50%)",
-        color: tokens.colorNeutralForeground1,
-    }
-});
-
 export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
 
-    const styles = calculatorResultsStyles();
     const filledPillStyles = sharedFilledPillStyles();
     const verticalMediumGapFlexStyles = sharedVerticalMediumGapFlexStyles();
     const verticalSmallGapFlexStyles = sharedVerticalSmallGapFlexStyles();
@@ -54,30 +31,17 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
     };
 
     const calculateAgentCost = () => {
-        // Combine total daily messages from all agents
+        // Combine total daily Copilot credits from all agents
         const totalDailyMessages = props.values.agents.reduce(
-            (total, agent) => total + agent.billedMessagesPerDay,
+            (total, agent) => total + agent.billedCreditsPerDay,
             0
         );
 
         // Calculate monthly cost based on workdays
-        const agentCost = totalDailyMessages * props.values.workDays * props.values.messageCost;
+        const agentCost = totalDailyMessages * props.values.workDays * props.values.creditCost;
         return { agentCost, totalDailyMessages };
     };
 
-    const calculateBreakEvenTime = () => {
-        if (props.values.users === 0) return 0;
-
-        // Calculate cost per user per day
-        const monthlyCostPerUser = (licenseCost + agentCost) / props.values.users;
-        const dailyCostPerUser = monthlyCostPerUser / props.values.workDays;
-
-        // Calculate hourly rate from annual salary
-        const hourlyRate = (props.values.averageSalary / 12) / (props.values.workDays * props.values.workHours);
-        const breakEvenMinutesPerDay = (dailyCostPerUser / hourlyRate) * 60;
-
-        return breakEvenMinutesPerDay;
-    };
 
     // Calculate license and agent costs first...
     const licenseCost = calculateLicenseCost();
@@ -86,12 +50,35 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
     // ...then calculate total cost
     const totalCost = licenseCost + agentCost;
 
+    // Compute alternate SKU comparison totals
+    const alternateSku = props.values.copilotSku === CopilotSku.M365Copilot
+        ? CopilotSku.M365CopilotChat
+        : CopilotSku.M365Copilot;
+
+    const calculateAlternateCosts = () => {
+        // License cost under alternate SKU
+        const altLicenseCost = alternateSku === CopilotSku.M365CopilotChat ? 0 : props.values.users * props.values.licenseCost;
+
+        // Agent costs under alternate SKU
+        const altTotalDailyCredits = props.values.agents.reduce((total, agent) => {
+            const creditsPerConversation = calculateCreditsPerConversation(agent.scenarioConsumption, alternateSku);
+            return total + creditsPerConversation * agent.conversationsPerDay;
+        }, 0);
+
+        const altAgentCost = altTotalDailyCredits * props.values.workDays * props.values.creditCost;
+        const altTotalCost = altLicenseCost + altAgentCost;
+
+        return { altLicenseCost, altAgentCost, altTotalCost, altTotalDailyCredits };
+    };
+
+    const { altLicenseCost, altAgentCost, altTotalCost, altTotalDailyCredits } = calculateAlternateCosts();
+
     // Calculate per-agent costs
     const calculatePerAgentCosts = () => {
         return props.values.agents.map(agent => {
-            const dailyMessages = agent.billedMessagesPerDay;
+            const dailyMessages = agent.billedCreditsPerDay;
             const monthlyMessages = dailyMessages * props.values.workDays;
-            const monthlyCost = monthlyMessages * props.values.messageCost;
+            const monthlyCost = monthlyMessages * props.values.creditCost;
             // Calculate percentage of total cost for each agent
             const percentOfTotal = totalCost > 0 ? (monthlyCost / totalCost) * 100 : 0;
 
@@ -107,115 +94,71 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
     };
 
     const perAgentCosts = calculatePerAgentCosts();
-    const breakEvenMinutesPerDay = calculateBreakEvenTime();
 
     const renderPercentageBar = (percent: number) => {
-        const barWidth = Math.max(percent, 2);
-
-        // Determine text color based on the fill percentage
-        const textColor = barWidth > 50 ? tokens.colorNeutralForegroundStaticInverted : tokens.colorNeutralForeground1;
-
-        return (
-            <div className={styles.percentBar}>
-                <div
-                    style={{
-                        width: `${barWidth}%`
-                    }}
-                />
-                <Text
-                    className={styles.percentText}
-                    style={{
-                        color: textColor
-                    }}
-                >
-                    {percent.toFixed(1)}%
-                </Text>
-            </div>
-        );
+        const value = Math.max(percent, 2) / 100;
+        return <ProgressBar value={value} thickness="medium" shape="rounded" />;
     };
 
     return (
         <Container
             icon={<p className={filledPillStyles.root}>RESULT</p>}
             header="The bottom line"
-            description="Based on the information you provided, here are the estimated costs and break-even points for your M365 Copilot deployment."
+            description="Based on the information you provided, here are the estimated monthly costs for your M365 Copilot deployment."
             width={800}
         >
             <ResultsContainer
                 results={[
                     {
                         description: "Estimated monthly licensing costs",
+                        calculations: [`users × $${formatNumber(props.values.licenseCost)} (per license)`],
                         value: `$${formatNumber(licenseCost)}`,
+                        valueSubtext: `${props.values.users.toLocaleString()} users`,
+                        altValue: `$${formatNumber(altLicenseCost)}`,
+                        altValueSubtext: `${props.values.users.toLocaleString()} users`,
                     },
                     {
                         description: "Estimated monthly agent costs",
+                        calculations: [`daily credits × $${formatNumber(props.values.creditCost)} (per credit) × ${props.values.workDays} (workdays)`],
                         value: `$${formatNumber(agentCost)}`,
-                    },
-                    {
-                        description: "Break-even point",
-                        value: `${breakEvenMinutesPerDay.toFixed(1)} minutes saved per user, per day (${((breakEvenMinutesPerDay / (props.values.workHours * 60)) * 100).toFixed(1)}% of workday)`,
+                        valueSubtext: `${formatNumber(totalDailyMessages)} credits/day\n${formatNumber(totalDailyMessages * props.values.workDays)} credits/month`,
+                        altValue: `$${formatNumber(altAgentCost)}`,
+                        altValueSubtext: `${formatNumber(altTotalDailyCredits)} credits/day\n${formatNumber(altTotalDailyCredits * props.values.workDays)} credits/month`,
                     },
                 ]}
+                valueLabel={`${props.values.copilotSku}`}
+                altValueLabel={`${alternateSku}`}
                 total={{
                     description: "Total estimated monthly cost",
+                    calculations: [`$${formatNumber(licenseCost)} (licenses) + $${formatNumber(agentCost)} (agents)`],
                     value: `$${formatNumber(totalCost)}`,
+                    valueSubtext: `${formatNumber(totalDailyMessages)} credits/day\n${formatNumber(totalDailyMessages * props.values.workDays)} credits/month`,
                 }}
+                totalAlt={{ value: `$${formatNumber(altTotalCost)}`, label: `${alternateSku}`, valueSubtext: `${formatNumber(altTotalDailyCredits)} credits/day\n${formatNumber(altTotalDailyCredits * props.values.workDays)} credits/month` }}
             />
             <div className={verticalMediumGapFlexStyles.root}>
                 <div>
                     <Switch
-                        label="View breakdown"
+                        label="More information"
                         checked={calculationVisible}
                         onChange={() => setCalculationVisible((v) => !v)}
                     />
                 </div>
                 <Collapse visible={calculationVisible}>
                     <div className={verticalMediumGapFlexStyles.root}>
-                        <div className={verticalSmallGapFlexStyles.root}>
-                            <Subtitle1>Totals</Subtitle1>
-                            <Text>The totals are calculated in the following way:</Text>
-                            <ResultsContainer
-                                results={[
-                                    {
-                                        description: "Estimated monthly licensing costs",
-                                        calculations: [`${props.values.users.toLocaleString()} (users) × $${formatNumber(props.values.licenseCost)} (per license)`],
-                                        value: `$${formatNumber(licenseCost)}`,
-                                    },
-                                    {
-                                        description: "Estimated monthly agent costs",
-                                        calculations: [`${totalDailyMessages} (messages) × $${formatNumber(props.values.messageCost)} (per message) × ${props.values.workDays} (workdays)`],
-                                        value: `$${formatNumber(agentCost)}`,
-                                    },
-                                    {
-                                        description: "Break-even point",
-                                        calculations: [
-                                            `Daily cost (per user): $${formatNumber((totalCost / props.values.users) / props.values.workDays)}`,
-                                            `Hourly rate (per user): $${formatNumber((props.values.averageSalary / 12) / (props.values.workDays * props.values.workHours))}`,
-                                            `($${formatNumber((totalCost / props.values.users) / props.values.workDays)} ÷ $${formatNumber((props.values.averageSalary / 12) / (props.values.workDays * props.values.workHours))} × 60 minutes)`,
-                                        ],
-                                        value: `${breakEvenMinutesPerDay.toFixed(1)} minutes saved per user, per day (${((breakEvenMinutesPerDay / (props.values.workHours * 60)) * 100).toFixed(1)}% of workday)`,
-                                    }
-                                ]}
-                                total={{
-                                    description: "Total estimated monthly cost",
-                                    calculations: [`$${formatNumber(licenseCost)} (licenses) + $${formatNumber(agentCost)} (agents)`],
-                                    value: `$${formatNumber(totalCost)}`,
-                                }}
-                            />
-                        </div>
-                        <Divider />
+
                         <div className={verticalSmallGapFlexStyles.root}>
                             <Subtitle1>Assumptions</Subtitle1>
                             <Text>This calculation is based on the following assumptions:</Text>
                             <ul>
                                 <li>
-                                    <Text>{props.values.users.toLocaleString()} users working {props.values.workHours} hours per day, {props.values.workDays} days per month, at an average salary of ${formatNumber(props.values.averageSalary)}</Text>
+                                    <Text>{props.values.users.toLocaleString()} users working {props.values.workDays} days per month</Text>
                                 </li>
                                 <li>
                                     <Text>Copilot license costs: ${formatNumber(props.values.licenseCost)} per user, per month</Text>
                                 </li>
                                 <li>
-                                    <Text>Agent costs: ${formatNumber(props.values.messageCost)} per message</Text>
+                                    <Text>Agent costs: ${formatNumber(props.values.creditCost)} per credit</Text>
                                 </li>
                             </ul>
                         </div>
@@ -248,8 +191,16 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
                                         .map(agentCost => (
                                             <TableRow key={agentCost.id}>
                                                 <TableCell>{agentCost.name}</TableCell>
-                                                <TableCell>{formatNumber(agentCost.monthlyMessages)} messages</TableCell>
-                                                <TableCell>${formatNumber(agentCost.monthlyCost)}</TableCell>
+                                                <TableCell>
+                                                    <Text>{formatNumber(agentCost.monthlyMessages)} credits</Text>
+                                                    <br />
+                                                    <Caption1>{formatNumber(agentCost.dailyMessages)} credits/day</Caption1>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Text>${formatNumber(agentCost.monthlyCost)}</Text>
+                                                    <br />
+                                                    <Caption1>{formatNumber(agentCost.monthlyMessages)} credits</Caption1>
+                                                </TableCell>
                                                 <TableCell>
                                                     {renderPercentageBar(agentCost.percentOfTotal)}
                                                 </TableCell>
@@ -257,7 +208,11 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
                                         ))}
                                     <TableRow appearance="neutral">
                                         <TableCell><Text weight="semibold">Total</Text></TableCell>
-                                        <TableCell><Text weight="semibold">{formatNumber(totalDailyMessages * props.values.workDays)}</Text></TableCell>
+                                        <TableCell>
+                                            <Text weight="semibold">{formatNumber(totalDailyMessages * props.values.workDays)} credits</Text>
+                                            <br />
+                                            <Caption1>{formatNumber(totalDailyMessages)} credits/day</Caption1>
+                                        </TableCell>
                                         <TableCell><Text weight="semibold">${formatNumber(totalCost)}</Text></TableCell>
                                         <TableCell>{renderPercentageBar(100)}</TableCell>
                                     </TableRow>
