@@ -4,7 +4,7 @@ import { IAgent } from "./IAgent";
 export interface ICalculatorValues {
     copilotSku: CopilotSku;
     licenseCost: number;
-    messageCost: number;
+    creditCost: number;
     users: number;
     averageSalary: number;
     workHours: number;

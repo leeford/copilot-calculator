@@ -27,7 +27,7 @@ interface IAgentProps {
         agentId: string,
         name: string,
         conversationsPerDay: number,
-        billedMessagesPerDay: number,
+    billedCreditsPerDay: number,
         scenarioConsumption?: IAgentScenarioConsumption
     ) => void;
     scenarioConsumption: IAgentScenarioConsumption;
@@ -36,7 +36,7 @@ interface IAgentProps {
     workDays: number;
 }
 
-// Message billing rates
+// Credit billing rates
 const CLASSIC_ANSWER_MESSAGE_BILLING_RATE = 1;
 const GENERATIVE_ANSWER_MESSAGE_BILLING_RATE = 2;
 const AGENT_ACTION_MESSAGE_BILLING_RATE = 5;
@@ -134,7 +134,7 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
         setLocalScenarioConsumption(props.scenarioConsumption);
     }, [props.scenarioConsumption]);
 
-    // Calculate messages per conversation
+    // Calculate credits per conversation
     const calculateMessagesPerConversation = () => {
         const isLicensed = props.copilotSku === CopilotSku.M365Copilot;
 
@@ -157,8 +157,8 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
 
     // Update agent when local state changes
     useEffect(() => {
-        const messageCount = conversationsPerDay * calculateMessagesPerConversation();
-        console.log(`Agent ${props.agentId} updated: ${agentName}, conversationsPerDay: ${conversationsPerDay}, messageCount: ${messageCount}`);
+    const messageCount = conversationsPerDay * calculateMessagesPerConversation();
+    console.log(`Agent ${props.agentId} updated: ${agentName}, conversationsPerDay: ${conversationsPerDay}, creditCount: ${messageCount}`);
         props.updateAgent(
             props.agentId,
             agentName,
@@ -317,8 +317,8 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
             <ResultsContainer
                 results={[
                     {
-                        description: "Estimated message consumption per day",
-                        value: `${formatNumber(conversationsPerDay * messagesPerConversation)} messages`
+                        description: "Estimated Copilot credit consumption per day",
+                        value: `${formatNumber(conversationsPerDay * messagesPerConversation)} credits`
                     }
                 ]}
             />
@@ -341,10 +341,10 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
                         size="large"
                     />
                     <Subtitle1>Calculation</Subtitle1>
-                    <Text>Message consumption is calculated based on the following scenarios:</Text>
+                    <Text>Credit consumption is calculated based on the following scenarios:</Text>
                     <Divider />
                     <Table
-                        aria-label="Message consumption table"
+                        aria-label="Credit consumption table"
                         size="small"
                     >
                         <TableHeader>
@@ -353,8 +353,8 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
                                 <TableHeaderCell>Standard</TableHeaderCell>
                                 <TableHeaderCell>Autonomous</TableHeaderCell>
                                 <TableHeaderCell>Total</TableHeaderCell>
-                                <TableHeaderCell>Message Rate</TableHeaderCell>
-                                <TableHeaderCell>Message Cost</TableHeaderCell>
+                                <TableHeaderCell>Credit Rate</TableHeaderCell>
+                                <TableHeaderCell>Credits</TableHeaderCell>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -372,8 +372,8 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
                     <ResultsContainer
                         results={[
                             {
-                                description: "Estimated message consumption per conversation",
-                                value: `${formatNumber(messagesPerConversation)} messages`
+                                description: "Estimated Copilot credit consumption per conversation",
+                                value: `${formatNumber(messagesPerConversation)} credits`
                             },
                             {
                                 description: "Total conversations per day",
@@ -383,19 +383,19 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
                                 value: `${formatNumber(conversationsPerDay)} conversations`
                             },
                             {
-                                description: "Total messages per day",
+                                description: "Total credits per day",
                                 calculations: [
-                                    `${formatNumber(conversationsPerDay)} (conversations) × ${formatNumber(messagesPerConversation)} (messages per conversation)`
+                                    `${formatNumber(conversationsPerDay)} (conversations) × ${formatNumber(messagesPerConversation)} (credits per conversation)`
                                 ],
-                                value: `${formatNumber(conversationsPerDay * messagesPerConversation)} messages`
+                                value: `${formatNumber(conversationsPerDay * messagesPerConversation)} credits`
                             }
                         ]}
                         total={{
-                            description: "Total messages per month",
+                            description: "Total credits per month",
                             calculations: [
-                                `${formatNumber(conversationsPerDay * messagesPerConversation)} (messages per day) × ${formatNumber(props.workDays)} (workdays)`
+                                `${formatNumber(conversationsPerDay * messagesPerConversation)} (credits per day) × ${formatNumber(props.workDays)} (workdays)`
                             ],
-                            value: `${formatNumber(conversationsPerDay * messagesPerConversation * props.workDays)} messages`
+                            value: `${formatNumber(conversationsPerDay * messagesPerConversation * props.workDays)} credits`
                         }}
                     />
                 </div>

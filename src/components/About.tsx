@@ -15,7 +15,7 @@ export const About: React.FC = () => {
         >
             <div className={verticalMediumGapFlexStyles.root}>
                 <Subtitle1>Introducing Copilot Calculator</Subtitle1>
-                <Text>Licensing is hard, especially Microsoft products - and M365 Copilot is not different in this regard. The original concept was simple, each user required a single license to use M365 Copilot, but now we have multiple SKUs, agents, an ever growing list of scenario types that consume "messages", and metered billing. So with that - Copilot Calculator was born!</Text>
+                <Text>Licensing is hard, especially Microsoft products - and M365 Copilot is not different in this regard. The original concept was simple, each user required a single license to use M365 Copilot, but now we have multiple SKUs, agents, an ever growing list of scenario types that consume Copilot credits, and metered billing. So with that - Copilot Calculator was born!</Text>
                 <Subtitle1>What is Copilot Calculator?</Subtitle1>
                 <Text>Copilot Calculator is a simple web application that helps you estimate the costs of using Microsoft 365 Copilot in your organisation. Spend a few minutes completing the forms and you will get an idea of estimated costs.</Text>
                 <Subtitle1>Who made it?</Subtitle1>

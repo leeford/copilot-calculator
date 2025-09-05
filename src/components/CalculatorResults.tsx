@@ -54,14 +54,14 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
     };
 
     const calculateAgentCost = () => {
-        // Combine total daily messages from all agents
+        // Combine total daily Copilot credits from all agents
         const totalDailyMessages = props.values.agents.reduce(
-            (total, agent) => total + agent.billedMessagesPerDay,
+            (total, agent) => total + agent.billedCreditsPerDay,
             0
         );
 
         // Calculate monthly cost based on workdays
-        const agentCost = totalDailyMessages * props.values.workDays * props.values.messageCost;
+        const agentCost = totalDailyMessages * props.values.workDays * props.values.creditCost;
         return { agentCost, totalDailyMessages };
     };
 
@@ -89,9 +89,9 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
     // Calculate per-agent costs
     const calculatePerAgentCosts = () => {
         return props.values.agents.map(agent => {
-            const dailyMessages = agent.billedMessagesPerDay;
+            const dailyMessages = agent.billedCreditsPerDay;
             const monthlyMessages = dailyMessages * props.values.workDays;
-            const monthlyCost = monthlyMessages * props.values.messageCost;
+            const monthlyCost = monthlyMessages * props.values.creditCost;
             // Calculate percentage of total cost for each agent
             const percentOfTotal = totalCost > 0 ? (monthlyCost / totalCost) * 100 : 0;
 
@@ -178,12 +178,12 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
                                 results={[
                                     {
                                         description: "Estimated monthly licensing costs",
-                                        calculations: [`${props.values.users.toLocaleString()} (users) × $${formatNumber(props.values.licenseCost)} (per license)`],
+                                        calculations: [`${props.values.copilotSku === CopilotSku.M365Copilot ? props.values.users.toLocaleString() : "0"} (users) × $${formatNumber(props.values.licenseCost)} (per license)`],
                                         value: `$${formatNumber(licenseCost)}`,
                                     },
                                     {
                                         description: "Estimated monthly agent costs",
-                                        calculations: [`${totalDailyMessages} (messages) × $${formatNumber(props.values.messageCost)} (per message) × ${props.values.workDays} (workdays)`],
+                                        calculations: [`${totalDailyMessages} (credits) × $${formatNumber(props.values.creditCost)} (per credit) × ${props.values.workDays} (workdays)`],
                                         value: `$${formatNumber(agentCost)}`,
                                     },
                                     {
@@ -215,7 +215,7 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
                                     <Text>Copilot license costs: ${formatNumber(props.values.licenseCost)} per user, per month</Text>
                                 </li>
                                 <li>
-                                    <Text>Agent costs: ${formatNumber(props.values.messageCost)} per message</Text>
+                                    <Text>Agent costs: ${formatNumber(props.values.creditCost)} per credit</Text>
                                 </li>
                             </ul>
                         </div>
@@ -248,7 +248,7 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
                                         .map(agentCost => (
                                             <TableRow key={agentCost.id}>
                                                 <TableCell>{agentCost.name}</TableCell>
-                                                <TableCell>{formatNumber(agentCost.monthlyMessages)} messages</TableCell>
+                        <TableCell>{formatNumber(agentCost.monthlyMessages)} credits</TableCell>
                                                 <TableCell>${formatNumber(agentCost.monthlyCost)}</TableCell>
                                                 <TableCell>
                                                     {renderPercentageBar(agentCost.percentOfTotal)}
@@ -257,7 +257,7 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
                                         ))}
                                     <TableRow appearance="neutral">
                                         <TableCell><Text weight="semibold">Total</Text></TableCell>
-                                        <TableCell><Text weight="semibold">{formatNumber(totalDailyMessages * props.values.workDays)}</Text></TableCell>
+                    <TableCell><Text weight="semibold">{formatNumber(totalDailyMessages * props.values.workDays)} credits</Text></TableCell>
                                         <TableCell><Text weight="semibold">${formatNumber(totalCost)}</Text></TableCell>
                                         <TableCell>{renderPercentageBar(100)}</TableCell>
                                     </TableRow>

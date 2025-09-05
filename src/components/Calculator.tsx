@@ -14,7 +14,7 @@ import { defaultAgents } from "../config/agents";
 const NUMBER_OF_USERS = 100;
 const AVERAGE_SALARY = 35000;
 const LICENSE_COST_PER_USER = 30; // USD
-const MESSAGE_COST = 0.01; // USD
+const CREDIT_COST = 0.01; // USD
 const WORK_HOURS = 7;
 const WORK_DAYS = 20;
 
@@ -30,13 +30,13 @@ export const Calculator: React.FC = () => {
         users: NUMBER_OF_USERS,
         averageSalary: AVERAGE_SALARY,
         licenseCost: LICENSE_COST_PER_USER,
-        messageCost: MESSAGE_COST,
+    creditCost: CREDIT_COST,
         workHours: WORK_HOURS,
         workDays: WORK_DAYS,
         agents: defaultAgents
     });
 
-    const updateAgent = (agentId: string, name: string, conversationsPerDay: number, billedMessagesPerDay: number, scenarioConsumption?: IAgentScenarioConsumption) => {
+    const updateAgent = (agentId: string, name: string, conversationsPerDay: number, billedCreditsPerDay: number, scenarioConsumption?: IAgentScenarioConsumption) => {
         setValues(prevValues => ({
             ...prevValues,
             agents: prevValues.agents.map(agent =>
@@ -45,7 +45,7 @@ export const Calculator: React.FC = () => {
                         ...agent,
                         name: name,
                         conversationsPerDay: conversationsPerDay,
-                        billedMessagesPerDay: billedMessagesPerDay,
+                        billedCreditsPerDay: billedCreditsPerDay,
                         scenarioConsumption: scenarioConsumption || agent.scenarioConsumption
                     }
                     : agent
