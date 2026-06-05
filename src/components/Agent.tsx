@@ -301,9 +301,8 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
                     <div>
                         {scenarioFootnotes.map((footnote, index) => (
                             <Caption1 key={index} style={{ display: "block", color: tokens.colorNeutralForeground3, marginBottom: tokens.spacingVerticalXS }}>
-                                <sup>{props.copilotSku === CopilotSku.M365Copilot ? index + 2 : index + 1}</sup> {footnote.note}{" "}
                                 {footnote.link && (
-                                    <Link href={footnote.link.url} target="_blank" inline>
+                                    <Link href={footnote.link.url} target="_blank" rel="noopener noreferrer" inline>
                                         {footnote.link.text}
                                     </Link>
                                 )}
