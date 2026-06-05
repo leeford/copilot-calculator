@@ -11,7 +11,7 @@ export const About: React.FC = () => {
         <Container
             header="About"
             description="Learn more about Copilot Calculator"
-            width={800}
+            width={900}
         >
             <div className={verticalMediumGapFlexStyles.root}>
                 <Subtitle1>Introducing Copilot Calculator</Subtitle1>

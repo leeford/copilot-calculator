@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Collapse } from "@fluentui/react-motion-components-preview";
 import { Container } from "./Container";
-import { Switch, Text, Divider, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, Input, Subtitle1, Button, makeStyles, Caption1 } from "@fluentui/react-components";
+import { Switch, Text, Divider, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, Input, Subtitle1, Button, makeStyles, Caption1, tokens, Link } from "@fluentui/react-components";
 import { CustomField } from "./CustomField";
 import { IAgentScenarioConsumption } from "../types/IAgentScenarioConsumption";
 import { sharedHorizontalMediumGapFlexStyles, sharedVerticalExtraSmallGapFlexStyles, sharedVerticalMediumGapFlexStyles } from "../styles/Styles";
@@ -10,6 +10,19 @@ import { formatNumber } from "../utils/formatUtils";
 import { Add12Filled, Add12Regular, bundleIcon, Subtract12Filled, Subtract12Regular } from "@fluentui/react-icons";
 import { ResultsContainer } from "./ResultsContainer";
 import { calculateCreditsPerConversation, scenarioConfigs } from "../config/scenarios";
+
+const scenarioFootnotes: { keys: (keyof IAgentScenarioConsumption)[]; note: string; link?: { text: string; url: string } }[] = [
+    {
+        keys: ["aiToolsBasic", "aiToolsStandard", "aiToolsPremium"],
+        note: "Actual cost is token-based (~1,000 tokens assumed per response). It is possible to be significantly over- or under-estimating credit consumption.",
+        link: { text: "Learn about prompt tokens", url: "https://learn.microsoft.com/en-us/ai-builder/licensing-prompt-tokens" },
+    },
+    {
+        keys: ["reasoningModel"],
+        note: "An additional surcharge applied on top of the feature rate (e.g. generative answer) when a reasoning model is used — total cost = feature rate + this surcharge. Billed at 100 credits per 10 responses (10 credits/1K tokens); actual token usage for reasoning models is typically far higher than standard models.",
+        link: { text: "Learn about reasoning model billing", url: "https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management#reasoning-model-billing-rates" },
+    },
+];
 
 const agentStyles = makeStyles({
     button: {
@@ -163,12 +176,16 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
     const { standardTotal, autonomousTotal, overallTotal } = calculateTotals();
 
     const renderScenarioRows = () => {
+        const m365Offset = props.copilotSku === CopilotSku.M365Copilot ? 1 : 0;
         return scenarioConfigs.map(scenario => {
             const scenarioValue = localScenarioConsumption[scenario.key];
+            const footnoteIndex = scenarioFootnotes.findIndex(f => f.keys.includes(scenario.key));
 
             return (
                 <TableRow key={scenario.key}>
-                    <TableCell>{scenario.name}</TableCell>
+                    <TableCell>
+                        <Text>{scenario.name}{footnoteIndex >= 0 && <sup> {footnoteIndex + 1 + m365Offset}</sup>}</Text>
+                    </TableCell>
                     <TableCell>
                         {renderIncreaseDecreaseButtons(
                             scenarioValue.standard,
@@ -201,7 +218,7 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
     return (
         <Container
             header={agentName}
-            width={800}
+            width={900}
             nested
         >
             <CustomField
@@ -257,7 +274,7 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
                         <TableHeader>
                             <TableRow>
                                 <TableHeaderCell>Scenario</TableHeaderCell>
-                                <TableHeaderCell>Standard</TableHeaderCell>
+                                <TableHeaderCell>Standard{props.copilotSku === CopilotSku.M365Copilot && <sup> 1</sup>}</TableHeaderCell>
                                 <TableHeaderCell>Autonomous</TableHeaderCell>
                                 <TableHeaderCell>Total</TableHeaderCell>
                                 <TableHeaderCell>Credit Rate</TableHeaderCell>
@@ -277,10 +294,22 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
                         </TableBody>
                     </Table>
                     {props.copilotSku === CopilotSku.M365Copilot && (
-                        <Caption1>
-                            * With an M365 Copilot license, all standard usage is included at no additional cost. Only autonomous usage is billed.
+                        <Caption1 style={{ display: "block", color: tokens.colorNeutralForeground3, marginBottom: tokens.spacingVerticalXS }}>
+                            <sup>1</sup> With an M365 Copilot license, all standard usage is included at no additional cost. Only autonomous usage is billed.
                         </Caption1>
                     )}
+                    <div>
+                        {scenarioFootnotes.map((footnote, index) => (
+                            <Caption1 key={index} style={{ display: "block", color: tokens.colorNeutralForeground3, marginBottom: tokens.spacingVerticalXS }}>
+                                <sup>{props.copilotSku === CopilotSku.M365Copilot ? index + 2 : index + 1}</sup> {footnote.note}{" "}
+                                {footnote.link && (
+                                    <Link href={footnote.link.url} target="_blank" inline>
+                                        {footnote.link.text}
+                                    </Link>
+                                )}
+                            </Caption1>
+                        ))}
+                    </div>
                     <ResultsContainer
                         results={[
                             {

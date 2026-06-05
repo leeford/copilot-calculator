@@ -9,4 +9,9 @@ export interface IAgentScenarioConsumption {
     aiToolsBasic: IAgentScenarioType;
     aiToolsStandard: IAgentScenarioType;
     aiToolsPremium: IAgentScenarioType;
+    contentProcessing: IAgentScenarioType;
+    voiceBasic: IAgentScenarioType;
+    voiceStandard: IAgentScenarioType;
+    voicePremium: IAgentScenarioType;
+    reasoningModel: IAgentScenarioType;
 }

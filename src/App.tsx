@@ -5,10 +5,12 @@ import { Calculator } from "./components/Calculator";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import { About } from "./components/About";
-import { bundleIcon, Calculator20Filled, Calculator20Regular, DarkTheme20Filled, DarkTheme20Regular, QuestionCircle20Filled, QuestionCircle20Regular } from "@fluentui/react-icons";
+import { Changelog } from "./components/Changelog";
+import { bundleIcon, Calculator20Filled, Calculator20Regular, DarkTheme20Filled, DarkTheme20Regular, History20Filled, History20Regular, QuestionCircle20Filled, QuestionCircle20Regular } from "@fluentui/react-icons";
 
 const AboutIcon = bundleIcon(QuestionCircle20Filled, QuestionCircle20Regular);
 const CalculatorIcon = bundleIcon(Calculator20Filled, Calculator20Regular);
+const ChangelogIcon = bundleIcon(History20Filled, History20Regular);
 const DarkModeIcon = bundleIcon(DarkTheme20Filled, DarkTheme20Regular);
 
 const appStyles = makeStyles({
@@ -84,6 +86,9 @@ const App: React.FC = () => {
                             <Tab id="about" icon={<AboutIcon />} value="about">
                                 About
                             </Tab>
+                            <Tab id="changelog" icon={<ChangelogIcon />} value="changelog">
+                                Changelog
+                            </Tab>
                         </TabList>
                         <Switch
                             label={<DarkModeIcon aria-label="Dark mode" />}
@@ -99,6 +104,8 @@ const App: React.FC = () => {
                                 content = <Calculator />;
                             } else if (selectedValue === "about") {
                                 content = <About />;
+                            } else if (selectedValue === "changelog") {
+                                content = <Changelog />;
                             } else {
                                 content = <ErrorPage message="Invalid tab selected." />;
                             }
