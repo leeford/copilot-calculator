@@ -105,7 +105,7 @@ export const CalculatorResults: React.FC<ICalculatorResultsProps> = (props) => {
             icon={<p className={filledPillStyles.root}>RESULT</p>}
             header="The bottom line"
             description="Based on the information you provided, here are the estimated monthly costs for your M365 Copilot deployment."
-            width={800}
+            width={900}
         >
             <ResultsContainer
                 results={[

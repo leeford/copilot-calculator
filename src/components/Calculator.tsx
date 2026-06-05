@@ -60,9 +60,9 @@ export const Calculator: React.FC = () => {
         <div className={verticalMediumGapFlexStyles.root}>
             <Container
                 icon={<p className={filledPillStyles.root}>STEP 1</p>}
-                header="Choose your Copilot"
+                header="Which Copilot?"
                 description="Pick the Copilot you want to use that best fits your needs."
-                width={800}
+                width={900}
             >
                 <CustomField
                     label="Which version of Copilot do you want to use?"
@@ -123,9 +123,9 @@ export const Calculator: React.FC = () => {
             </Container>
             <Container
                 icon={<p className={filledPillStyles.root}>STEP 2</p>}
-                header="Size your Copilot"
+                header="Size Copilot"
                 description="Provide a few details about your organization to get a better estimate."
-                width={800}
+                width={900}
             >
                 <div className={horizontalMediumGapWrapFlexStyles.root}>
                     <div className={columns.half}>
@@ -177,9 +177,9 @@ export const Calculator: React.FC = () => {
             </Container>
             <Container
                 icon={<p className={filledPillStyles.root}>STEP 3</p>}
-                header="Extend your Copilot"
+                header="Extend Copilot"
                 description="Bring in added functionality to your Copilot experience in the form of Copilot Studio agents."
-                width={800}
+                width={900}
             >
                 <Text>Sizing up and predicting the cost of agents is not an exact science. <b>To simplify the process, we have provided some example agents that may fit your use-cases.</b> Bear in mind these are just a best-guess and may vary wildly in real-world scenarios.</Text>
                 {values.agents.map((agent) => (

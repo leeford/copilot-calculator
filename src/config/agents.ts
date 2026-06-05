@@ -38,6 +38,26 @@ export const defaultAgents: IAgent[] = [
             aiToolsPremium: {
                 standard: 0,
                 autonomous: 0
+            },
+            contentProcessing: {
+                standard: 0,
+                autonomous: 0
+            },
+            voiceBasic: {
+                standard: 0,
+                autonomous: 0
+            },
+            voiceStandard: {
+                standard: 0,
+                autonomous: 0
+            },
+            voicePremium: {
+                standard: 0,
+                autonomous: 0
+            },
+            reasoningModel: {
+                standard: 0,
+                autonomous: 0
             }
         }
     },
@@ -74,6 +94,26 @@ export const defaultAgents: IAgent[] = [
                 autonomous: 0
             },
             aiToolsPremium: {
+                standard: 0,
+                autonomous: 0
+            },
+            contentProcessing: {
+                standard: 0,
+                autonomous: 0
+            },
+            voiceBasic: {
+                standard: 0,
+                autonomous: 0
+            },
+            voiceStandard: {
+                standard: 0,
+                autonomous: 0
+            },
+            voicePremium: {
+                standard: 0,
+                autonomous: 0
+            },
+            reasoningModel: {
                 standard: 0,
                 autonomous: 0
             }
