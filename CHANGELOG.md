@@ -1,3 +1,9 @@
+## June 11, 2026
+
+- Added "per 1K tokens" label beneath token-based scenario names (AI tools basic, standard, premium and reasoning model surcharge) in the agent breakdown table
+- Clarified agent flow actions label to show it is billed per 100 actions
+- Increased calculator width for better readability
+
 ## June 5, 2026
 
 - Added Voice billing scenarios: Basic (classic orchestration), Standard (generative orchestration), and Premium (real-time)

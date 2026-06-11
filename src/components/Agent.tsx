@@ -15,7 +15,7 @@ const scenarioFootnotes: { keys: (keyof IAgentScenarioConsumption)[]; note: stri
     {
         keys: ["aiToolsBasic", "aiToolsStandard", "aiToolsPremium"],
         note: "Actual cost is token-based (~1,000 tokens assumed per response). It is possible to be significantly over- or under-estimating credit consumption.",
-        link: { text: "Learn about prompt tokens", url: "https://learn.microsoft.com/en-us/ai-builder/licensing-prompt-tokens" },
+        link: { text: "Learn about AI tools billing", url: "https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management#copilot-credits-billing-rates" },
     },
     {
         keys: ["reasoningModel"],
@@ -184,7 +184,14 @@ export const Agent: React.FunctionComponent<IAgentProps> = (props) => {
             return (
                 <TableRow key={scenario.key}>
                     <TableCell>
-                        <Text>{scenario.name}{footnoteIndex >= 0 && <sup> {footnoteIndex + 1 + m365Offset}</sup>}</Text>
+                        <div>
+                            <Text>{scenario.name}{footnoteIndex >= 0 && <sup> {footnoteIndex + 1 + m365Offset}</sup>}</Text>
+                            {scenario.creditRateLabel && (
+                                <Caption1 style={{ display: "block", color: tokens.colorNeutralForeground3 }}>
+                                    {scenario.creditRateLabel}
+                                </Caption1>
+                            )}
+                        </div>
                     </TableCell>
                     <TableCell>
                         {renderIncreaseDecreaseButtons(
