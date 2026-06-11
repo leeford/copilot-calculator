@@ -5,6 +5,7 @@ export interface ScenarioConfigItem {
     key: keyof IAgentScenarioConsumption;
     name: string;
     billingRate: number;
+    creditRateLabel?: string;
     isIncludedWithLicense: boolean;
     supportsAutonomous?: boolean;
 }
@@ -64,6 +65,7 @@ export const scenarioConfigs: ScenarioConfigItem[] = [
         key: "aiToolsBasic",
         name: "AI tools: Basic response",
         billingRate: AI_TOOLS_BASIC_BILLING_RATE,
+        creditRateLabel: "per 1K tokens",
         isIncludedWithLicense: false,
         supportsAutonomous: true,
     },
@@ -71,6 +73,7 @@ export const scenarioConfigs: ScenarioConfigItem[] = [
         key: "aiToolsStandard",
         name: "AI tools: Standard response",
         billingRate: AI_TOOLS_STANDARD_BILLING_RATE,
+        creditRateLabel: "per 1K tokens",
         isIncludedWithLicense: false,
         supportsAutonomous: true,
     },
@@ -78,6 +81,7 @@ export const scenarioConfigs: ScenarioConfigItem[] = [
         key: "aiToolsPremium",
         name: "AI tools: Premium response",
         billingRate: AI_TOOLS_PREMIUM_BILLING_RATE,
+        creditRateLabel: "per 1K tokens",
         isIncludedWithLicense: false,
         supportsAutonomous: true,
     },
@@ -113,6 +117,7 @@ export const scenarioConfigs: ScenarioConfigItem[] = [
         key: "reasoningModel",
         name: "Reasoning model surcharge",
         billingRate: REASONING_MODEL_BILLING_RATE,
+        creditRateLabel: "per 1K tokens",
         isIncludedWithLicense: false,
         supportsAutonomous: true,
     },
